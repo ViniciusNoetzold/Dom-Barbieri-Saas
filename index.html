@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>DarkVeil Barber</title>
+    <meta name="description" content="Luxury Barber Management System" />
+    
+    <!-- Preconnect to Font Origins to optimize dictionary/loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- CSS Imports at the absolute top of styles/links -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+            },
+            colors: {
+              // "Old Money" Green Palette
+              darkveil: {
+                950: '#030f05', // Deepest Forest Black/Green (Background)
+                900: '#0a1f10', // Dark Racing Green (Cards/Surfaces)
+                800: '#142e1b', // Lighter Green (Hover states)
+                700: '#1f4229', // Borders
+                100: '#e0eadd', // Text light (Off-white with green tint)
+              },
+              // "Old Money" Gold/Brass Palette
+              gold: {
+                50:  '#f9f7f0', // Cream (Light Mode Background)
+                100: '#fcf9ee', // Cream/Pearl
+                200: '#f2e8c6', // Champagne
+                300: '#e6d094', // Light Gold
+                400: '#d4b35e', // Classic Gold Text
+                500: '#b89230', // Primary Button Gold (Antique)
+                600: '#8f6e20', // Dark Bronze
+                700: '#6b5015', // Deep Bronze
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'slide-up': 'slideUp 0.4s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* CSS Reset & Base Styles */
+      body {
+        font-family: 'Inter', sans-serif;
+        /* Default (Light) -> Dark Mode overrides */
+        background-color: #f9f7f0; /* gold-50 */
+        color: #030f05; /* darkveil-950 */
+        transition: background-color 0.3s ease, color 0.3s ease;
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior-y: none; /* Prevent rubber-banding on pull */
+      }
+
+      /* Dark Mode Overrides applied via HTML class */
+      html.dark body {
+        background-color: #030f05;
+        color: #e0eadd;
+      }
+      
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .no-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "framer-motion": "https://esm.sh/framer-motion@^12.29.2",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
