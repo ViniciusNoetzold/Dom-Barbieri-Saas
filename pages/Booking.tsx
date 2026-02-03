@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Service, Barber, TimeSlot } from '../types';
-import { SERVICES, BARBERS, ASSETS } from '../constants';
 import { api } from '../services/api';
-import { GlassCard, Button } from '../components/UI';
+import { GlassCard, Button, SectionHeader } from '../components/UI';
 import { AnimatedList } from '../components/AnimatedList';
-import { Calendar as CalendarIcon, CheckCircle, X, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { GlobalHero } from '../components/GlobalHero';
+import { AppointmentCard } from '../components/AppointmentCard';
+import { useAppointments } from '../context/AppointmentContext';
+import { Calendar as CalendarIcon, CheckCircle, X, ChevronLeft, ChevronRight, Clock, History, RotateCcw } from 'lucide-react';
+import { PAGE_THEMES } from '../constants';
 
 interface BookingProps {
   user: User;
@@ -97,62 +100,29 @@ const FullCalendar: React.FC<{
     );
 };
 
-// --- Hero Section ---
-const HeroSection: React.FC<{ userName: string }> = ({ userName }) => {
-  const [greeting, setGreeting] = useState('');
-
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Bom dia');
-    else if (hour < 18) setGreeting('Boa tarde');
-    else setGreeting('Boa noite');
-  }, []);
-
-  return (
-    <div className="relative w-full h-[40vh] overflow-hidden flex items-end group">
-      {/* Background Image with Gradient Mask */}
-      <div 
-        className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-500"
-        style={{ 
-          backgroundImage: `url("${ASSETS.HERO_BG}")`,
-          maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)'
-        }}
-      />
-      
-      {/* Content */}
-      <div className="relative z-20 px-6 pb-8 w-full">
-        <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-        >
-            {/* Force text to be readable on the hero image even in light mode, or adapt if image changes */}
-            {/* Strategy: Use text-shadow or keep it light-on-dark since the image is usually dark/grayscale */}
-            <h1 className="text-4xl font-serif text-white drop-shadow-md tracking-tight leading-tight mix-blend-overlay dark:mix-blend-normal">
-            {greeting}, <br />
-            <span className="text-gold-200 dark:text-gold-300">{userName.split(' ')[0]}</span>.
-            </h1>
-            <div className="w-12 h-1 bg-gold-600 mt-3 mb-3 rounded-full" />
-            <p className="text-gray-200 dark:text-gray-400 text-sm font-light uppercase tracking-widest opacity-90 drop-shadow-sm">
-            A cada dia mais perto de sua melhor versão.
-            </p>
-        </motion.div>
-      </div>
-    </div>
-  );
-};
-
 // --- Main Flow ---
 
 export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
+  const { 
+    activeAppointment, 
+    addAppointment, 
+    getServiceById, 
+    getBarberById, 
+    draftBooking, 
+    setDraftBooking,
+    services, 
+    barbers,
+    history 
+  } = useAppointments();
+
   const [view, setView] = useState<'HOME' | 'BARBER' | 'TIME' | 'SUCCESS'>('HOME');
   const [showServiceOverlay, setShowServiceOverlay] = useState(false);
+  const [showHistoryOverlay, setShowHistoryOverlay] = useState(false);
   
   // State
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
-  // Initialize with current date
+  
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     const d = new Date();
     d.setHours(0,0,0,0);
@@ -164,13 +134,21 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- Effects ---
+  
   useEffect(() => {
-    // When date changes in TIME view, or we enter TIME view
-    if ((view === 'TIME' || view === 'HOME') && selectedBarber) {
-       // We can pre-fetch here if we wanted to show indicators on the calendar
-       // For now, we fetch when the user selects a barber/time
+    if (draftBooking && view === 'HOME') {
+      const service = services.find(s => s.id === draftBooking.serviceId);
+      const barber = barbers.find(b => b.id === draftBooking.barberId);
+      
+      if (service && barber) {
+        setSelectedService(service);
+        setSelectedBarber(barber);
+        setDraftBooking(null); // Clear draft
+        setView('TIME'); // Jump straight to time selection
+      }
     }
-  }, [selectedDate, selectedBarber, view]);
+  }, [draftBooking, view, setDraftBooking, services, barbers]);
+
 
   useEffect(() => {
       if (view === 'TIME' && selectedBarber) {
@@ -189,17 +167,31 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
     setView('BARBER');
   };
 
+  const handleRepeatBooking = (apt: any) => {
+    const service = getServiceById(apt.serviceId);
+    const barber = getBarberById(apt.barberId);
+    if(service && barber) {
+        setSelectedService(service);
+        setSelectedBarber(barber);
+        setShowHistoryOverlay(false);
+        setView('TIME');
+    }
+  };
+
   const handleConfirm = async () => {
     if (!selectedService || !selectedBarber || !selectedTime) return;
     setIsSubmitting(true);
     try {
-      await api.createAppointment({
+      const appointmentData = {
         serviceId: selectedService.id,
         barberId: selectedBarber.id,
         userId: user.id,
         date: selectedDate.toISOString().split('T')[0],
         time: selectedTime
-      });
+      };
+      
+      const newApt = await api.createAppointment(appointmentData);
+      addAppointment(newApt);
       setView('SUCCESS');
     } catch (e) {
       alert("Failed to book: " + e);
@@ -213,6 +205,13 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
     setSelectedService(null);
     setSelectedBarber(null);
     setSelectedTime(null);
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bom dia';
+    if (hour < 18) return 'Boa tarde';
+    return 'Boa noite';
   };
 
   // --- Render Views ---
@@ -237,7 +236,6 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
     );
   }
 
-  // Common Header for Sub-pages
   const SubPageHeader = ({ title }: { title: string }) => (
     <div className="flex items-center gap-4 mb-6 pt-6 px-4">
       <button 
@@ -257,7 +255,6 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
   );
 
   return (
-    // Padding bottom massive to account for sticky button + nav
     <div className="relative min-h-screen bg-gold-50 dark:bg-darkveil-950 pb-48 transition-colors duration-300">
       
       {/* View: HOME (Landing) */}
@@ -267,12 +264,41 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
           animate={{ opacity: 1 }} 
           exit={{ opacity: 0 }}
         >
-          <HeroSection userName={user.name} />
+          <GlobalHero 
+            title="Bem-vindo à Dom Barbieri" 
+            subtitle={`${getGreeting()}, ${user.name.split(' ')[0]}.`}
+            backgroundImage={PAGE_THEMES.BOOKING.bgImage}
+            titleColor={PAGE_THEMES.BOOKING.titleColor}
+            overlayGradient={PAGE_THEMES.BOOKING.overlayColor}
+          />
           
-          <div className="relative z-30">
-             <FullCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+          <div className="relative z-30 -mt-16 space-y-6">
+             
+             {/* 2.1 Active Appointment OR Empty State */}
+             <div className="px-6">
+                {activeAppointment ? (
+                    <AppointmentCard 
+                        type="ACTIVE" 
+                        appointment={activeAppointment} 
+                        service={getServiceById(activeAppointment.serviceId)}
+                        barber={getBarberById(activeAppointment.barberId)}
+                        onAction={() => alert('Abrindo mapa...')}
+                    />
+                ) : (
+                    <AppointmentCard 
+                        type="EMPTY" 
+                        onAction={() => setShowHistoryOverlay(true)}
+                    />
+                )}
+             </div>
 
-             <div className="px-6 flex justify-center mt-8">
+             {/* Calendar Section */}
+             <div className="mt-4">
+                 <h3 className="px-6 text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">Agenda</h3>
+                 <FullCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+             </div>
+
+             <div className="px-6 flex justify-center mt-2">
                <motion.button
                  whileHover={{ scale: 1.02 }}
                  whileTap={{ scale: 0.98 }}
@@ -282,7 +308,7 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
                    bg-gradient-to-r from-darkveil-800 to-darkveil-950
                    shadow-[0_4px_20px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)]
                    border border-gold-500/30
-                   text-gold-300 font-bold text-lg tracking-widest uppercase
+                   text-gold-400 font-bold text-lg tracking-widest uppercase
                    flex items-center justify-center gap-3
                    group transition-all
                  "
@@ -313,7 +339,7 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                    {BARBERS.map(barber => (
+                    {barbers.map(barber => (
                     <GlassCard 
                         key={barber.id}
                         onClick={() => { setSelectedBarber(barber); setView('TIME'); }}
@@ -412,7 +438,7 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
         </motion.div>
       )}
 
-      {/* Service Overlay (Modal) */}
+      {/* Service Overlay */}
       <AnimatePresence>
         {showServiceOverlay && (
           <div className="fixed inset-0 z-[60] flex flex-col justify-end">
@@ -439,10 +465,80 @@ export const BookingFlow: React.FC<BookingProps> = ({ user }) => {
                     </button>
                 </div>
                 <div className="flex-1 overflow-hidden p-2">
-                    <AnimatedList items={SERVICES} onSelect={handleServiceSelect} />
+                    <AnimatedList items={services} onSelect={handleServiceSelect} />
                 </div>
              </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* History Overlay (Full Screen Blur) */}
+      <AnimatePresence>
+        {showHistoryOverlay && (
+             <motion.div
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[70] bg-gold-50/90 dark:bg-darkveil-950/90 backdrop-blur-[15px] flex flex-col"
+             >
+                <div className="pt-safe px-6 pb-6 flex items-center justify-between">
+                     <SectionHeader title="Histórico" subtitle="Seus rituais anteriores" />
+                     <button 
+                        onClick={() => setShowHistoryOverlay(false)}
+                        className="p-3 rounded-full bg-darkveil-900/10 dark:bg-white/10"
+                     >
+                        <X className="w-6 h-6 text-darkveil-900 dark:text-white" />
+                     </button>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto px-6 space-y-4 pb-12">
+                     {history.length > 0 ? (
+                         history.map(apt => (
+                            <motion.div 
+                                key={apt.id}
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                            >
+                                <GlassCard className="p-4 flex flex-col gap-3 border-l-4 border-l-gold-500">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h4 className="font-bold text-lg font-serif text-darkveil-900 dark:text-white">
+                                                {getServiceById(apt.serviceId)?.name}
+                                            </h4>
+                                            <p className="text-sm text-gray-500">
+                                                {new Date(apt.date).toLocaleDateString()} • {apt.time}
+                                            </p>
+                                        </div>
+                                        <div className="px-2 py-1 bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase rounded">
+                                            Concluído
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 border-t border-darkveil-900/5 dark:border-white/5 pt-3">
+                                        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-300">
+                                            <img src={getBarberById(apt.barberId)?.avatarUrl} className="w-full h-full object-cover" />
+                                        </div>
+                                        <span>{getBarberById(apt.barberId)?.name}</span>
+                                        
+                                        <Button 
+                                            variant="ghost" 
+                                            className="ml-auto text-xs py-1 h-8 text-gold-600 dark:text-gold-400"
+                                            onClick={() => handleRepeatBooking(apt)}
+                                        >
+                                            <RotateCcw className="w-3 h-3 mr-1" /> Agendar Novamente
+                                        </Button>
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                         ))
+                     ) : (
+                         <div className="flex flex-col items-center justify-center h-64 text-center">
+                             <History className="w-12 h-12 text-gray-300 mb-4" />
+                             <p className="text-gray-500">Nenhum histórico disponível.</p>
+                         </div>
+                     )}
+                </div>
+             </motion.div>
         )}
       </AnimatePresence>
 

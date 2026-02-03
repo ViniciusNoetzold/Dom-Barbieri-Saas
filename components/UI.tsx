@@ -6,6 +6,7 @@ interface GlassProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
   className?: string;
   intensity?: 'low' | 'high';
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export const GlassCard: React.FC<GlassProps> = ({ children, className = '', intensity = 'high', ...props }) => {

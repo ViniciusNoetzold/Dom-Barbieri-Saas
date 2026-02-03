@@ -11,7 +11,7 @@ class ApiService {
     await delay(800); // Simulate server processing
     
     // In a real app, hash verification happens on server.
-    if (email === 'admin@darkveil.com' && password === 'admin') {
+    if (email === 'admin@dombarbieri.com' && password === 'admin') {
       return {
         id: 'u_admin',
         name: 'Admin User',

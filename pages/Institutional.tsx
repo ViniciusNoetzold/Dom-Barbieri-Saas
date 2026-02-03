@@ -1,30 +1,42 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { GlassCard, SectionHeader } from '../components/UI';
-import { BARBERS, ASSETS } from '../constants';
+import { ASSETS, PAGE_THEMES } from '../constants';
+import { GlobalHero } from '../components/GlobalHero';
 import { MapPin, Star } from 'lucide-react';
+import { useAppointments } from '../context/AppointmentContext';
 
 export const Institutional: React.FC = () => {
+  const { barbers } = useAppointments();
+
   return (
     <div className="pb-24 space-y-12 bg-gold-50 dark:bg-darkveil-950 transition-colors duration-300">
       
+      {/* 1. Global Hero */}
+      <GlobalHero 
+        title="Dom Barbieri" 
+        subtitle="Tradição e excelência." 
+        backgroundImage={PAGE_THEMES.INSTITUTIONAL.bgImage}
+        titleColor={PAGE_THEMES.INSTITUTIONAL.titleColor}
+        overlayGradient={PAGE_THEMES.INSTITUTIONAL.overlayColor}
+      />
+
       {/* 1. Brand Story */}
-      <section className="px-6 pt-10">
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-6"
-        >
-            <h1 className="text-4xl font-serif font-bold text-darkveil-900 dark:text-white tracking-widest uppercase drop-shadow-sm dark:drop-shadow-xl transition-colors">
-                DarkVeil
-            </h1>
-            <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-gold-500 to-transparent mx-auto" />
-            <p className="text-gray-600 dark:text-gray-300 leading-8 font-light text-base max-w-sm mx-auto">
-                Nascida da tradição clássica e forjada na modernidade. O <span className="text-gold-600 dark:text-gold-300 font-medium">Protocolo Italiano</span> não é apenas um corte, é um ritual de renovação. 
-                <br/><br/>
-                Em nosso santuário, o tempo para e a sua imagem é esculpida com precisão cirúrgica.
-            </p>
-        </motion.div>
+      <section className="px-6 -mt-8 relative z-20">
+        <GlassCard className="p-6">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center space-y-4"
+            >
+                <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-gold-500 to-transparent mx-auto" />
+                <p className="text-gray-600 dark:text-gray-300 leading-8 font-light text-base max-w-sm mx-auto">
+                    Nascida da tradição clássica e forjada na modernidade. O <span className="text-gold-600 dark:text-gold-300 font-medium">Protocolo Italiano</span> não é apenas um corte, é um ritual de renovação. 
+                    <br/><br/>
+                    Em nosso santuário, o tempo para e a sua imagem é esculpida com precisão cirúrgica.
+                </p>
+            </motion.div>
+        </GlassCard>
       </section>
 
       {/* 2. Map Section - Silver/Dark Theme */}
@@ -84,9 +96,9 @@ export const Institutional: React.FC = () => {
 
       {/* 4. Team & Portfolio */}
       <section className="px-6">
-         <SectionHeader title="Mestres do Corte" subtitle="Conheça quem cuida da sua imagem" />
+         <SectionHeader title="Equipe" subtitle="Conheça quem cuida da sua imagem" />
          <div className="space-y-6">
-            {BARBERS.map((barber) => (
+            {barbers.map((barber) => (
                 <GlassCard key={barber.id} className="overflow-hidden group cursor-pointer border border-darkveil-900/5 dark:border-white/5 hover:border-gold-500/30 transition-colors">
                     <div className="flex h-32">
                         {/* Avatar: B&W to Color Transition */}

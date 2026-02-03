@@ -6,6 +6,7 @@ import { AdminDashboard } from './pages/Admin';
 import { Onboarding } from './components/Onboarding';
 import { User, UserRole } from './types';
 import { api } from './services/api';
+import { AppointmentProvider } from './context/AppointmentContext';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -36,6 +37,11 @@ const App: React.FC = () => {
       setShowOnboarding(false);
     }
   };
+  
+  const handleUpdateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    // In real app, this would also PATCH to API
+  };
 
   const handleLogout = () => {
     setUser(null);
@@ -44,48 +50,50 @@ const App: React.FC = () => {
   if (loadingUser) return <div className="h-screen bg-darkveil-950 flex items-center justify-center text-white">Loading...</div>;
 
   return (
-    <Router>
-      {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
-      
-      <Routes>
-        <Route 
-          path="/" 
-          element={
-            !user ? (
-              <Login onLogin={handleLogin} />
-            ) : user.role === UserRole.ADMIN ? (
-              <Navigate to="/admin" replace />
-            ) : (
-              <Navigate to="/dashboard" replace />
-            )
-          } 
-        />
-
-        <Route 
-          path="/dashboard" 
-          element={
-            user && user.role === UserRole.CLIENT ? (
-              <Dashboard user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
-        />
-
-        <Route 
-          path="/admin" 
-          element={
-            user && user.role === UserRole.ADMIN ? (
-              <AdminDashboard user={user} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          } 
-        />
+    <AppointmentProvider>
+      <Router>
+        {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
         
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              !user ? (
+                <Login onLogin={handleLogin} />
+              ) : user.role === UserRole.ADMIN ? (
+                <Navigate to="/admin" replace />
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )
+            } 
+          />
+
+          <Route 
+            path="/dashboard" 
+            element={
+              user && user.role === UserRole.CLIENT ? (
+                <Dashboard user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            } 
+          />
+
+          <Route 
+            path="/admin" 
+            element={
+              user && user.role === UserRole.ADMIN ? (
+                <AdminDashboard user={user} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            } 
+          />
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AppointmentProvider>
   );
 };
 

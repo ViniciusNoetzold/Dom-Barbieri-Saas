@@ -1,17 +1,44 @@
 import { Service, Barber, Announcement } from './types';
+import { BACKGROUND_CONFIG } from './config/backgrounds';
 
 // --- Centralized Asset Management ---
 // To use local images:
 // 1. Place images in /assets/images/
 // 2. Update these paths (e.g., '/assets/images/hero-bg.jpg')
 export const ASSETS = {
-  HERO_BG: 'assets/images/hero-bg.jpg',
+  // Default fallback
+  HERO_BG: BACKGROUND_CONFIG.HOME.image,
   
   // Dynamic helpers to keep current mock logic or switch to static naming map
   getBarberAvatar: (id: string) => `https://picsum.photos/100/100?random=${id.replace(/\D/g,'')}`,
   getServiceImage: (id: string) => `https://picsum.photos/400/300?grayscale&blur=2&random=${id.replace(/\D/g,'')}`,
   getGalleryImage: (id: number) => `https://picsum.photos/400/300?random=${id}&grayscale`,
   getAnnouncementImage: (id: string) => `https://picsum.photos/600/300?random=${id.replace(/\D/g,'')}`
+};
+
+// 1.1 Sistema de Wallpapers Individuais e Estilização Estática
+// Updated: Consumes configuration from src/config/backgrounds.ts
+export const PAGE_THEMES = {
+  BOOKING: {
+    bgImage: BACKGROUND_CONFIG.HOME.image,
+    titleColor: '#D4AF37', 
+    overlayColor: `linear-gradient(to bottom, black ${BACKGROUND_CONFIG.HOME.opacityCheck}, transparent 100%)`
+  },
+  PROFILE: {
+    bgImage: BACKGROUND_CONFIG.PROFILE.image,
+    titleColor: '#D4AF37', 
+    overlayColor: `linear-gradient(to bottom, black ${BACKGROUND_CONFIG.PROFILE.opacityCheck}, transparent 100%)`
+  },
+  INSTITUTIONAL: {
+    bgImage: BACKGROUND_CONFIG.INSTITUTIONAL.image,
+    titleColor: '#D4AF37', 
+    overlayColor: `linear-gradient(to bottom, black ${BACKGROUND_CONFIG.INSTITUTIONAL.opacityCheck}, transparent 100%)`
+  },
+  ALERTS: {
+    bgImage: BACKGROUND_CONFIG.ALERTS.image,
+    titleColor: '#D4AF37',
+    overlayColor: `linear-gradient(to bottom, black ${BACKGROUND_CONFIG.ALERTS.opacityCheck}, transparent 100%)`
+  }
 };
 
 export const SERVICES: Service[] = [
@@ -74,7 +101,7 @@ export const SERVICES: Service[] = [
    {
     id: 's8',
     name: 'Cabelo, Barba e Visagismo',
-    description: 'Experiência completa DarkVeil.',
+    description: 'Experiência completa Dom Barbieri.',
     price: 180,
     durationMinutes: 120,
     imageUrl: ASSETS.getServiceImage('8')
@@ -84,16 +111,16 @@ export const SERVICES: Service[] = [
 export const BARBERS: Barber[] = [
   {
     id: 'b1',
-    name: 'Marcus "Fade" Aurelius',
-    bio: 'Master of gradients and sharp lines.',
+    name: 'Marcos Toazza',
+    bio: 'Especialista em visagismo.',
     avatarUrl: ASSETS.getBarberAvatar('1'),
     rating: 4.9,
     specialties: ['Fade', 'Beard']
   },
   {
     id: 'b2',
-    name: 'Silas Vane',
-    bio: 'Classic scissor cuts and styling.',
+    name: 'Bruno Toazza',
+    bio: 'Mestre em visagismo.',
     avatarUrl: ASSETS.getBarberAvatar('2'),
     rating: 4.8,
     specialties: ['Scissor', 'Long Hair']

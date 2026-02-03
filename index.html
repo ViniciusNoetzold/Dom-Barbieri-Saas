@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>DarkVeil Barber</title>
+    <title>Dom Barbieri</title>
     <meta name="description" content="Luxury Barber Management System" />
     
     <!-- Preconnect to Font Origins to optimize dictionary/loading -->
@@ -33,16 +33,16 @@
                 700: '#1f4229', // Borders
                 100: '#e0eadd', // Text light (Off-white with green tint)
               },
-              // "Old Money" Gold/Brass Palette
+              // "Old Money" Gold/Amber Palette (Updated for deeper, richer tone)
               gold: {
                 50:  '#f9f7f0', // Cream (Light Mode Background)
                 100: '#fcf9ee', // Cream/Pearl
                 200: '#f2e8c6', // Champagne
                 300: '#e6d094', // Light Gold
-                400: '#d4b35e', // Classic Gold Text
-                500: '#b89230', // Primary Button Gold (Antique)
-                600: '#8f6e20', // Dark Bronze
-                700: '#6b5015', // Deep Bronze
+                400: '#D4AF37', // Old Gold / Metallic Amber (Primary Text)
+                500: '#DAA520', // Goldenrod / Aged Gold (Buttons)
+                600: '#B8860B', // Dark Goldenrod (Shadows/Hover)
+                700: '#8B6914', // Deep Bronze
               }
             },
             animation: {
@@ -90,21 +90,30 @@
         -ms-overflow-style: none;  /* IE and Edge */
         scrollbar-width: none;  /* Firefox */
       }
+      
+      /* Utility for Mix Blend Text */
+      .mix-blend-diff {
+        mix-blend-mode: difference;
+        color: white; /* Ensures inversion works correctly */
+      }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.4",
+    "react": "https://esm.sh/react@rc",
+    "react-dom": "https://esm.sh/react-dom@rc?deps=react@rc",
+    "react-dom/client": "https://esm.sh/react-dom@rc/client?deps=react@rc",
+    "framer-motion": "https://esm.sh/framer-motion@11.0.8?deps=react@rc,react-dom@rc",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?deps=react@rc",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?deps=react@rc,react-dom@rc",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "framer-motion": "https://esm.sh/framer-motion@^12.29.2",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0"
+    "react/": "https://esm.sh/react@^19.2.4/"
   }
 }
 </script>
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

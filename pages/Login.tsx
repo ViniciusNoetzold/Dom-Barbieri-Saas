@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Input, Button, GlassCard } from '../components/UI';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/AnimatedTabs';
 import { api } from '../services/api';
 import { User as UserType } from '../types';
 import { Scissors, Shield, User } from 'lucide-react';
@@ -10,15 +10,15 @@ interface LoginProps {
 }
 
 export const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '', name: '', phone: '' });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle generic form submission based on the active tab context
+  const handleSubmit = async (e: React.FormEvent, type: 'LOGIN' | 'REGISTER') => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Mocking Auth for both flows
+      // Mocking Auth for both flows (Register would use api.register in real app)
       const user = await api.login(formData.email, formData.password);
       onLogin(user);
     } catch (error) {
@@ -32,8 +32,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const handleTestLogin = async (role: 'ADMIN' | 'CLIENT') => {
     setLoading(true);
     try {
-      // Credentials matching api.ts logic
-      const email = role === 'ADMIN' ? 'admin@darkveil.com' : 'client@darkveil.com';
+      const email = role === 'ADMIN' ? 'admin@dombarbieri.com' : 'client@dombarbieri.com';
       const password = role === 'ADMIN' ? 'admin' : 'password';
       
       const user = await api.login(email, password);
@@ -52,63 +51,84 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="absolute bottom-[-20%] right-[-20%] w-[500px] h-[500px] bg-gold-300/20 dark:bg-gold-600/10 rounded-full blur-[120px]" />
 
       <GlassCard className="w-full max-w-md p-8 z-10 border-gold-500/10">
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-gold-600 to-gold-400 dark:to-darkveil-950 rounded-full flex items-center justify-center mb-4 shadow-lg shadow-gold-900/20 border border-gold-500/20">
             <Scissors className="text-darkveil-900 dark:text-gold-200 w-8 h-8" />
           </div>
           <h1 className="text-3xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-darkveil-900 to-darkveil-700 dark:from-gold-100 dark:to-gold-400">
-            DarkVeil
+            Dom Barbieri
           </h1>
           <p className="text-gold-600 dark:text-gold-500/60 text-xs tracking-[0.2em] uppercase mt-2 font-medium">Gentleman's Quarters</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <>
-              <Input 
-                placeholder="Full Name" 
-                value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
-                required={!isLogin}
+        {/* Animated Tabs Implementation */}
+        <Tabs defaultValue="login" className="w-full">
+          <TabsList>
+            <TabsTrigger value="login">Entrar</TabsTrigger>
+            <TabsTrigger value="register">Cadastrar</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="login">
+            <form onSubmit={(e) => handleSubmit(e, 'LOGIN')} className="space-y-4">
+               <Input 
+                placeholder="E-mail" 
+                type="email"
+                value={formData.email}
+                onChange={e => setFormData({...formData, email: e.target.value})}
+                required
               />
               <Input 
-                placeholder="WhatsApp Number" 
+                placeholder="Senha" 
+                type="password"
+                value={formData.password}
+                onChange={e => setFormData({...formData, password: e.target.value})}
+                required
+              />
+              <div className="pt-2">
+                <Button type="submit" isLoading={loading} className="w-full">
+                  Acessar Conta
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="register">
+            <form onSubmit={(e) => handleSubmit(e, 'REGISTER')} className="space-y-4">
+              <Input 
+                placeholder="Nome Completo" 
+                value={formData.name}
+                onChange={e => setFormData({...formData, name: e.target.value})}
+                required
+              />
+              <Input 
+                placeholder="WhatsApp" 
                 type="tel"
                 value={formData.phone}
                 onChange={e => setFormData({...formData, phone: e.target.value})}
-                required={!isLogin}
+                required
               />
-            </>
-          )}
-          
-          <Input 
-            placeholder="Email Address" 
-            type="email"
-            value={formData.email}
-            onChange={e => setFormData({...formData, email: e.target.value})}
-            required
-          />
-          <Input 
-            placeholder="Password" 
-            type="password"
-            value={formData.password}
-            onChange={e => setFormData({...formData, password: e.target.value})}
-            required
-          />
-
-          <Button type="submit" isLoading={loading} className="w-full mt-4">
-            {isLogin ? 'Sign In' : 'Join Membership'}
-          </Button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <button 
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-gray-500 dark:text-gray-400 text-sm hover:text-darkveil-900 dark:hover:text-gold-300 transition-colors"
-          >
-            {isLogin ? "Don't have an account? Sign Up" : "Already a member? Sign In"}
-          </button>
-        </div>
+              <Input 
+                placeholder="E-mail" 
+                type="email"
+                value={formData.email}
+                onChange={e => setFormData({...formData, email: e.target.value})}
+                required
+              />
+              <Input 
+                placeholder="Criar Senha" 
+                type="password"
+                value={formData.password}
+                onChange={e => setFormData({...formData, password: e.target.value})}
+                required
+              />
+              <div className="pt-2">
+                <Button type="submit" isLoading={loading} className="w-full">
+                  Tornar-se Membro
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+        </Tabs>
 
         {/* Dev Tools / Quick Login */}
         <div className="mt-8 pt-6 border-t border-darkveil-900/10 dark:border-white/5">

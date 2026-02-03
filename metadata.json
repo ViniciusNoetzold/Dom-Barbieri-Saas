@@ -1,5 +1,5 @@
 {
-  "name": "DarkVeil Barber",
+  "name": "Dom Barbieri",
   "description": "A luxury barbershop management PWA featuring a DarkVeil aesthetic, robust booking system, and admin dashboard.",
   "requestFramePermissions": [
     "geolocation"

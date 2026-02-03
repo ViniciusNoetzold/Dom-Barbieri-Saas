@@ -46,6 +46,7 @@ export interface Appointment {
   date: string;
   time: string;
   status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  notes?: string; // Internal barber notes
 }
 
 export interface Announcement {
